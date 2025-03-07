@@ -69,6 +69,18 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     });
   }
 
+  void markAsCompleted(int index) {
+    setState(() {
+      travlePlan[index].isCompleted = true;
+    });
+  }
+
+  void markAsPending(int index) {
+    setState(() {
+      travlePlan[index].isCompleted = false;
+    });
+  }
+
   void editPlan(int index) {
     _eventController.text = travlePlan[index].title;
     _descController.text = travlePlan[index].description;
@@ -149,6 +161,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                         _descController.text,
                         today,
                       );
+                      Navigator.of(context).pop(); // Close the dialog
                     },
                     child: Text('Submit Event'),
                   ),
@@ -174,13 +187,32 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               itemCount: travlePlan.length,
               itemBuilder: (context, index) {
                 final plan = travlePlan[index];
-                return GestureDetector(
-                  onDoubleTap: () => deletePlan(index),
-                  onLongPress: () => editPlan(index),
-                  child: ListTile(
-                    title: Text(plan.title),
-                    subtitle: Text(plan.description),
-                    trailing: Icon(Icons.check_box),
+                Color planColor =
+                    plan.isCompleted ? Colors.green : Colors.white;
+
+                return Dismissible(
+                  key: UniqueKey(),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (direction) {
+                    if (direction == DismissDirection.startToEnd) {
+                      markAsCompleted(index);
+                    } else if (direction == DismissDirection.endToStart) {
+                      markAsPending(index);
+                    }
+                  },
+                  child: GestureDetector(
+                    onDoubleTap: () => deletePlan(index),
+                    onLongPress: () => editPlan(index),
+                    child: Card(
+                      color: planColor,
+                      child: ListTile(
+                        title: Text(plan.title),
+                        subtitle: Text(plan.description),
+                        trailing: Icon(
+                          plan.isCompleted ? Icons.check_circle : Icons.pending,
+                        ),
+                      ),
+                    ),
                   ),
                 );
               },
