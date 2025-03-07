@@ -63,6 +63,55 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     }
   }
 
+  void deletePlan(int index) {
+    setState(() {
+      travlePlan.removeAt(index);
+    });
+  }
+
+  void editPlan(int index) {
+    _eventController.text = travlePlan[index].title;
+    _descController.text = travlePlan[index].description;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          // same from below
+          title: Text('Edit Plan'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _eventController,
+                decoration: InputDecoration(labelText: 'Event Name'),
+              ),
+              TextField(
+                controller: _descController,
+                decoration: InputDecoration(labelText: 'Event Description'),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                //instead of calling add plan we edit them (overwrite)
+                setState(() {
+                  travlePlan[index].title = _eventController.text;
+                  travlePlan[index].description = _descController.text;
+                });
+                _eventController.clear();
+                _descController.clear();
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Save Changes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +123,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             builder: (context) {
               return AlertDialog(
                 scrollable: true,
-                title: Text('Edit Plan'),
+                title: Text('Add Plan'),
                 content: Padding(
                   padding: EdgeInsets.all(8),
                   child: Column(
@@ -125,10 +174,14 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               itemCount: travlePlan.length,
               itemBuilder: (context, index) {
                 final plan = travlePlan[index];
-                return ListTile(
-                  title: Text(plan.title),
-                  subtitle: Text(plan.description),
-                  trailing: Icon(Icons.check_box),
+                return GestureDetector(
+                  onDoubleTap: () => deletePlan(index),
+                  onLongPress: () => editPlan(index),
+                  child: ListTile(
+                    title: Text(plan.title),
+                    subtitle: Text(plan.description),
+                    trailing: Icon(Icons.check_box),
+                  ),
                 );
               },
             ),
