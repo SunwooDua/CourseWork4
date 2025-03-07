@@ -5,13 +5,13 @@ void main() {
   runApp(PlanApp());
 }
 
-class TravlePlan {
+class TravelPlan {
   String title;
   String description;
   DateTime date;
   bool isCompleted;
 
-  TravlePlan({
+  TravelPlan({
     required this.title,
     required this.description,
     required this.date,
@@ -41,7 +41,7 @@ class PlanManagerScreen extends StatefulWidget {
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
   DateTime today = DateTime.now();
-  List<TravlePlan> travlePlan = [];
+  List<TravelPlan> travelPlan = [];
   TextEditingController _eventController = TextEditingController();
   TextEditingController _descController = TextEditingController();
 
@@ -54,8 +54,8 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
   void addPlan(String title, String description, DateTime date) {
     if (_eventController.text.isNotEmpty && _descController.text.isNotEmpty) {
       setState(() {
-        travlePlan.add(
-          TravlePlan(title: title, description: description, date: date),
+        travelPlan.add(
+          TravelPlan(title: title, description: description, date: date),
         );
       });
       _eventController.clear();
@@ -65,31 +65,30 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
 
   void deletePlan(int index) {
     setState(() {
-      travlePlan.removeAt(index);
+      travelPlan.removeAt(index);
     });
   }
 
   void markAsCompleted(int index) {
     setState(() {
-      travlePlan[index].isCompleted = true;
+      travelPlan[index].isCompleted = true;
     });
   }
 
   void markAsPending(int index) {
     setState(() {
-      travlePlan[index].isCompleted = false;
+      travelPlan[index].isCompleted = false;
     });
   }
 
   void editPlan(int index) {
-    _eventController.text = travlePlan[index].title;
-    _descController.text = travlePlan[index].description;
+    _eventController.text = travelPlan[index].title;
+    _descController.text = travelPlan[index].description;
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          // same from below
           title: Text('Edit Plan'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -107,10 +106,9 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                //instead of calling add plan we edit them (overwrite)
                 setState(() {
-                  travlePlan[index].title = _eventController.text;
-                  travlePlan[index].description = _descController.text;
+                  travelPlan[index].title = _eventController.text;
+                  travelPlan[index].description = _descController.text;
                 });
                 _eventController.clear();
                 _descController.clear();
@@ -184,9 +182,9 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: travlePlan.length,
+              itemCount: travelPlan.length,
               itemBuilder: (context, index) {
-                final plan = travlePlan[index];
+                final plan = travelPlan[index];
                 Color planColor =
                     plan.isCompleted ? Colors.green : Colors.white;
 
@@ -208,8 +206,24 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                       child: ListTile(
                         title: Text(plan.title),
                         subtitle: Text(plan.description),
-                        trailing: Icon(
-                          plan.isCompleted ? Icons.check_circle : Icons.pending,
+                        trailing: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              plan.date.toString().split(
+                                ' ',
+                              )[0], // Display the date in YYYY-MM-DD format
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            Icon(
+                              plan.isCompleted
+                                  ? Icons.check_circle
+                                  : Icons.pending,
+                            ),
+                          ],
                         ),
                       ),
                     ),
