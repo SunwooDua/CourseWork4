@@ -181,9 +181,17 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             onDaySelected: _onDaySelected, // mark selected day
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: travelPlan.length,
-              itemBuilder: (context, index) {
+            child: ReorderableListView(
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) {
+                    newIndex -= 1;
+                  }
+                  final TravelPlan plan = travelPlan.removeAt(oldIndex);
+                  travelPlan.insert(newIndex, plan);
+                });
+              },
+              children: List.generate(travelPlan.length, (index) {
                 final plan = travelPlan[index];
                 Color planColor =
                     plan.isCompleted ? Colors.green : Colors.white;
@@ -229,7 +237,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                     ),
                   ),
                 );
-              },
+              }),
             ),
           ),
         ],
