@@ -5,6 +5,20 @@ void main() {
   runApp(PlanApp());
 }
 
+class TravlePlan {
+  String title;
+  String description;
+  DateTime date;
+  bool isCompleted;
+
+  TravlePlan({
+    required this.title,
+    required this.description,
+    required this.date,
+    this.isCompleted = false,
+  });
+}
+
 class PlanApp extends StatelessWidget {
   const PlanApp({super.key});
 
@@ -27,26 +41,96 @@ class PlanManagerScreen extends StatefulWidget {
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
   DateTime today = DateTime.now();
+  List<TravlePlan> travlePlan = [];
+  TextEditingController _eventController = TextEditingController();
+  TextEditingController _descController = TextEditingController();
+
   void _onDaySelected(DateTime day, DateTime focusedDay) {
     setState(() {
       today = day;
     });
   }
 
+  void addPlan(String title, String description, DateTime date) {
+    if (_eventController.text.isNotEmpty && _descController.text.isNotEmpty) {
+      setState(() {
+        travlePlan.add(
+          TravlePlan(title: title, description: description, date: date),
+        );
+      });
+      _eventController.clear();
+      _descController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Plan Manager'), backgroundColor: Colors.blue),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                scrollable: true,
+                title: Text('Edit Plan'),
+                content: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _eventController,
+                        decoration: InputDecoration(labelText: 'Event Name'),
+                      ),
+                      TextField(
+                        controller: _descController,
+                        decoration: InputDecoration(
+                          labelText: 'Event Description',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      addPlan(
+                        _eventController.text,
+                        _descController.text,
+                        today,
+                      );
+                    },
+                    child: Text('Submit Event'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
       body: Column(
         children: [
-          Container(
-            child: TableCalendar(
-              focusedDay: today,
-              firstDay: DateTime.utc(2025, 3, 6),
-              lastDay: DateTime.utc(2030, 12, 31),
-              availableGestures: AvailableGestures.all,
-              selectedDayPredicate: (day) => isSameDay(day, today),
-              onDaySelected: _onDaySelected, // mark selected day
+          TableCalendar(
+            focusedDay: today,
+            firstDay: DateTime.utc(2025, 3, 6),
+            lastDay: DateTime.utc(2030, 12, 31),
+            availableGestures: AvailableGestures.all,
+            selectedDayPredicate: (day) => isSameDay(day, today),
+            onDaySelected: _onDaySelected, // mark selected day
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: travlePlan.length,
+              itemBuilder: (context, index) {
+                final plan = travlePlan[index];
+                return ListTile(
+                  title: Text(plan.title),
+                  subtitle: Text(plan.description),
+                  trailing: Icon(Icons.check_box),
+                );
+              },
             ),
           ),
         ],
